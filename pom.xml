@@ -247,7 +247,10 @@
 				<version>3.0.1</version>
 				<scope>provided</scope>
 			</dependency>
-
+	<dependency>
+			<groupId>org.mvel</groupId>
+			<artifactId>mvel2</artifactId>
+		</dependency>
 	</dependencies>
     
   

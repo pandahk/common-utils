@@ -1,0 +1,153 @@
+package cn.vshcxl.sh;
+
+
+import org.apache.commons.lang.StringUtils;
+import org.codehaus.jackson.annotate.JsonIgnore;
+
+import cn.vshcxl.sh.apiext.StringUtil;
+import cn.vshcxl.sh.exception.ExceptAll;
+import cn.vshcxl.sh.exception.IExcept;
+import cn.vshcxl.sh.exception.ProjectException;
+
+/**
+ * 操作返回的对象，exceptAll是必须要有的对象
+ */
+public class Result implements java.io.Serializable {
+	private static final long serialVersionUID = 1L;
+	private boolean result;// true:正确,false:业务出错
+	private String message;
+	private IExcept except;// 异常编码
+	private Object[] retObjs;// 操作成功后，如果想带一些返回值在此设置
+
+	/**
+	 * 由异常来构建返回结果
+	 */
+	public Result(ProjectException opeExcept) {
+		this.result = false;
+		if (opeExcept == null) {
+			throw new IllegalArgumentException();
+		}
+		this.except = opeExcept.getExcept();
+	}
+
+	public Result(IExcept except) {
+		if (except == ExceptAll.no)
+			this.result = true;
+		else
+			this.result = false;
+		this.except = except;
+	}
+
+	private Result(boolean result) {
+		this.result = result;
+	}
+
+	private Result(String message) {
+		this.result = false;
+		this.except = ExceptAll.project_undefined;
+		this.message = message;
+	}
+
+	/****
+	 * 得到成功的返回结果，单例
+	 * 
+	 * @return
+	 */
+	public static Result getSuc() {
+		return null;
+//		return getSuc(null);
+	}
+
+//	public static Result getSuc(String sucInfo) {
+//		sucInfo = StringUtil.isNull(sucInfo) ? MessageUtils.getInstance().getString("common.hint.success") : sucInfo;
+//		Result suc = new Result(true);
+//		suc.setMessage(sucInfo);
+//		suc.except = ExceptAll.no;
+//		return suc;
+//	}
+
+	/***
+	 * 得到错误的结果
+	 * 
+	 * @param errmsg
+	 * @return
+	 */
+	public static Result getError(String errmsg) {
+		return new Result(errmsg);
+	}
+
+	/**
+	 * 得到错误编码，如果正确则为“no”
+	 * 
+	 * @return
+	 */
+	public IExcept getExcept() {
+		return this.except;
+	}
+
+	public boolean isSuc() {
+		return result;
+	}
+
+	/***
+	 * 返回的对象，注意读与取的先后顺序
+	 * 
+	 * @return
+	 */
+	@java.beans.Transient
+	@JsonIgnore
+	public Object[] getRetObjs() {
+		return retObjs;
+	}
+
+	public Object getRetObj(int index) {
+		if (retObjs == null || retObjs.length <= index) {
+			return null;
+		}
+		return retObjs[index];
+	}
+
+	/***
+	 * 设置返回值
+	 * 
+	 * @param retObjs
+	 */
+	public void setRetObjs(Object... retObjs) {
+		this.retObjs = retObjs;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	public String getMessage(ParamInfoBean errBean) {
+//		if (StringUtils.isNotBlank(this.message)) {
+//			return this.message;
+//		}
+//		return this.except.getErrMsg(errBean);
+//	}
+
+	public String getMessage() {
+		if (StringUtils.isNotBlank(this.message)) {
+			return this.message;
+		}
+		return this.except.getErrMsg();
+	}
+
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//	public JSONObject getJsonObj(ParamInfoBean errBean) {
+//		String message = getMessage(errBean);
+//		return new JSONObject("result", result ? 1 : 0, "value", this.except.getErrorValue(), "code",
+//				this.except.getErrorCode(), "msg", message);
+//	}
+//
+//	@JsonIgnore
+//	public JSONObject getJsonObj() {
+//		String message = getMessage();
+//		return new JSONObject("result", result ? 1 : 0, "value", this.except.getErrorValue(), "code",
+//				this.except.getErrorCode(), "msg", message);
+//	}
+
+}
